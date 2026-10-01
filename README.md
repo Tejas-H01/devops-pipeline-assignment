@@ -1,92 +1,87 @@
 # End-to-End DevOps Pipeline using Docker, Jenkins, Kubernetes & Monitoring
 
 ## Project Overview
-This project demonstrates a **complete DevOps workflow** for beginners by implementing an end-to-end CI/CD pipeline using industry-standard tools.
-
-The project starts from source code stored in GitHub, automates the build using Jenkins, containerizes the application with Docker, deploys it on Kubernetes, and monitors the system using Prometheus and Grafana.
-
-This project is designed for **learning, resume building, and interview preparation**.
+This project demonstrates a complete **DevOps Continuous Integration & Continuous Deployment (CI/CD)** workflow for the **NewsHub** web application. It integrates industry-standard tools including **GitHub**, **Jenkins**, **Docker**, **Kubernetes**, and **Prometheus** for automated testing, containerization, local deployment, and monitoring.
 
 ---
 
-## Project Objectives
-- Understand real-world DevOps pipeline flow
-- Learn CI/CD using Jenkins
-- Containerize applications using Docker
-- Deploy applications on Kubernetes
-- Implement basic monitoring using Prometheus & Grafana
-
----
-
-## Tools & Technologies Used
-- **GitHub** – Source code management  
-- **Jenkins** – Continuous Integration (CI)  
-- **Docker** – Containerization  
-- **Kubernetes (Minikube)** – Container orchestration  
-- **Prometheus** – Monitoring & metrics collection  
-- **Grafana** – Visualization & dashboards  
-- **Nginx** – Web server  
-
----
-
-## ⚙️ DevOps Workflow (How This Project Works)
-Developer Pushes Code to GitHub
-↓
-Jenkins Pipeline Triggers Automatically
-↓
-Jenkins Clones Repository
-↓
-Docker Image is Built
-↓
-Application is Deployed to Kubernetes
-↓
-Application & Containers are Monitored
-
-
----
-
-##Project Structure
+## 📁 Repository Structure
+```text
 End-to-End-DevOps-Pipeline/
 ├── app/
-│ └── index.html
-├── Dockerfile
-├── Jenkinsfile
+│   └── index.html          # NewsHub web application source code
+├── Dockerfile              # Nginx-based container build file
+├── Jenkinsfile             # 7-stage Jenkins CI/CD pipeline definition
 ├── k8s/
-│ ├── deployment.yaml
-│ └── service.yaml
+│   ├── deployment.yaml     # Kubernetes Deployment manifest (2 replicas)
+│   └── service.yaml        # Kubernetes NodePort Service manifest
 ├── monitoring/
-│ └── prometheus.yml
-└── README.md
-
+│   └── prometheus.yml      # Prometheus scraping configuration
+└── README.md               # Complete assignment documentation
+```
 
 ---
 
-##How to Run This Project (Step-by-Step)
+## ⚙️ DevOps Workflow Architecture
 
-### Clone the Repository
+```text
+[ Developer Push ]
+       ↓
+[ GitHub Repository ]
+       ↓
+[ Jenkins CI/CD Pipeline ]
+       ├─ Stage 1: Checkout Source
+       ├─ Stage 2: Validate Application Files
+       ├─ Stage 3: Build Docker Image (devops-web:latest)
+       ├─ Stage 4: Cleanup Old Container (devops-web-container)
+       ├─ Stage 5: Deploy Docker Container (Port 8082:80)
+       ├─ Stage 6: Verify Deployment (HTTP 200 OK Ping)
+       └─ Stage 7: Deploy to Kubernetes (Optional)
+       ↓
+[ Live Application at http://localhost:8082 ]
+```
+
+---
+
+## 🚀 How to Run Locally
+
+### 1. Manual Docker Build & Deployment
 ```bash
-git clone https://github.com/m-prasanna/End-to-End-DevOps-Pipeline-using-Docker-Jenkins-Kubernetes-Monitoring.git
-cd End-to-End-DevOps-Pipeline-using-Docker-Jenkins-Kubernetes-Monitoring
-
+# Build the Docker image
 docker build -t devops-web .
-docker run -d -p 8082:80 devops-web
 
+# Stop and remove any existing container instance
+docker stop devops-web-container
+docker rm devops-web-container
 
-minikube start
-kubectl apply -f k8s/
-minikube service devops-service
+# Run container mapped to port 8082
+docker run -d --name devops-web-container -p 8082:80 devops-web
 
+# Verify active container
+docker ps --filter "name=devops-web-container"
 
-Monitoring Setup
-docker run -d -p 9090:9090 -v ${PWD}\monitoring\prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus
+# Access application in browser or terminal
+http://localhost:8082
+```
 
-http://localhost:9090
+### 2. Jenkins Automated Pipeline Setup
+1. Launch **Jenkins** (via Docker or standalone WAR/Service on port `8080`).
+2. Install **Git** and **Pipeline** plugins.
+3. Create a **New Item** → Select **Pipeline**.
+4. Under **Pipeline Definition**, select **Pipeline script from SCM**.
+5. Set SCM to **Git** and enter this repository path.
+6. Click **Save** and **Build Now**.
 
+---
 
-docker run -d -p 3000:3000 grafana/grafana
-http://localhost:3000
+## 📊 Verification Commands
+```bash
+# Check Docker image
+docker images devops-web
 
+# Check running container
+docker ps --filter "name=devops-web-container"
 
-
-
-
+# Test local web server response
+powershell -Command "(Invoke-WebRequest -Uri 'http://localhost:8082' -UseBasicParsing).StatusCode"
+```
